@@ -44,7 +44,7 @@ const FamilyTree: React.FC<IFamilyTreeProps> = (props: IFamilyTreeProps) => {
   return (
     <Wrapper>
       <CenterDiv>
-        <FamilyMemberCard person={firstFamilyRoot} />;
+        <FamilyMemberCard person={firstFamilyRoot} />
       </CenterDiv>
       <AbsoluteCenterDiv>
         <FamilyGroup
