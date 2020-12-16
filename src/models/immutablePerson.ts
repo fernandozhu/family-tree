@@ -1,3 +1,5 @@
+import { List } from "immutable";
+
 export enum EGender {
   Male = "male",
   Female = "female",
@@ -7,21 +9,23 @@ export interface IPerson {
   id: string;
   name: string;
   gender: EGender;
-  parentIds: string[];
-  childIds: string[];
+  parentIds: List<string>;
+  childIds: List<string>;
+  compositeChildrenId: string;
 
   setId(value: string): IPerson;
   setGender(value: EGender): IPerson;
-  setParentIds(value: string[]): IPerson;
-  setChildIds(value: string[]): IPerson;
+  setParentIds(value: List<string>): IPerson;
+  setChildIds(value: List<string>): IPerson;
 }
 
 export class ImmutablePerson implements IPerson {
   private _id: string;
   private _name: string;
   private _gender: EGender;
-  private _parentIds: string[];
-  private _childIds: string[];
+  private _parentIds: List<string>;
+  private _childIds: List<string>;
+  private _compositeChildrenId: string;
 
   public get id(): string {
     return this._id;
@@ -35,22 +39,27 @@ export class ImmutablePerson implements IPerson {
     return this._gender;
   }
 
-  public get parentIds(): string[] {
+  public get parentIds(): List<string> {
     return this._parentIds;
   }
 
-  public get childIds(): string[] {
+  public get childIds(): List<string> {
     return this._childIds;
   }
 
+  public get compositeChildrenId(): string {
+    return this._compositeChildrenId;
+  }
+
   constructor(json: any) {
-    ({
-      id: this._id,
-      name: this._name,
-      gender: this._gender,
-      parentIds: this._parentIds,
-      childIds: this._childIds,
-    } = json ?? {});
+    // Convert number  id to string with fallback to ""
+    this._id = String(json?.id || "");
+    this._parentIds = List((json?.parents || []).map(String));
+    this._childIds = List((json?.children || []).map(String));
+    // Unpack and assign other properties
+    ({ name: this._name, gender: this._gender } = json ?? {});
+
+    this._compositeChildrenId = this._childIds.sort().join("#");
   }
 
   public setId(value: string): ImmutablePerson {
@@ -80,7 +89,7 @@ export class ImmutablePerson implements IPerson {
     return this;
   }
 
-  public setParentIds(value: string[]): ImmutablePerson {
+  public setParentIds(value: List<string>): ImmutablePerson {
     if (value !== this._parentIds) {
       const json = this.toJson();
       json.parentIds = value;
@@ -89,7 +98,7 @@ export class ImmutablePerson implements IPerson {
     return this;
   }
 
-  public setChildIds(value: string[]): ImmutablePerson {
+  public setChildIds(value: List<string>): ImmutablePerson {
     if (value !== this._childIds) {
       const json = this.toJson();
       json.childIds = value;
